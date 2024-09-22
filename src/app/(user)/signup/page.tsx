@@ -12,8 +12,12 @@ import { Button } from "@/components/ui/button"
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { PrismaClient } from "@prisma/client";
+import axios from "axios";
 
 type formInput = z.infer<typeof schema>
+
+const client = new PrismaClient()
 
 const schema = z.object({
   name: z.string().min(1, { message: "Cannot be empty" }),
@@ -25,11 +29,26 @@ export default function Home() {
   const form = useForm<formInput>({
     resolver: zodResolver(schema)
   })
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = form;
+  const { register, handleSubmit, formState: { errors, isSubmitting } , setError} = form;
 
-  const onSubmit = async (data: any) => {
-    await new Promise((r) => setTimeout(r, 2000))
-    console.log(data);
+  const onSubmit = async (data: {
+    email: string,
+    password: string,
+    name: string
+  }) => {
+
+    const { name, email, password} = data
+
+    const response = await axios.post("http://localhost:3000/api/user/signin", {
+       data : {
+        name,
+        email,
+        password
+       }
+    })
+
+    console.log(response)
+
   };
 
   return (
